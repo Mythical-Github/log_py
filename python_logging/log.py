@@ -10,11 +10,13 @@ init(autoreset=True)
 
 logger = logging.getLogger(__name__)
 
-if getattr(sys, 'frozen', False):
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(sys.executable))
-else:
-    SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-os.chdir(SCRIPT_DIR)
+# if getattr(sys, 'frozen', False):
+#     SCRIPT_DIR = os.path.dirname(os.path.abspath(sys.executable))
+# else:
+#     SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+# os.chdir(SCRIPT_DIR)
+
+SCRIPT_DIR = os.getcwd()
 
 def load_theme_colors():
     colors_file = os.path.join(SCRIPT_DIR, 'log_colors.json')
