@@ -1,7 +1,6 @@
 import os
-import sys
-import logging
 import json
+import logging
 from datetime import datetime
 from shutil import get_terminal_size
 from colorama import Fore, Style, init
@@ -10,19 +9,27 @@ init(autoreset=True)
 
 logger = logging.getLogger(__name__)
 
-# if getattr(sys, 'frozen', False):
-#     SCRIPT_DIR = os.path.dirname(os.path.abspath(sys.executable))
-# else:
-#     SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-# os.chdir(SCRIPT_DIR)
 
-SCRIPT_DIR = f'{os.getcwd()}/src'
+log_base_dir = f'{os.getcwd()}/src'
+
+colors_json_path = f'{log_base_dir}/log_colors.json'
+
+
+def set_log_base_dir(base_dir: str):
+    global log_base_dir
+    log_base_dir = base_dir
+
+
+def set_colors_json_path(json_path: str):
+    global colors_json_path
+    colors_json_path = json_path
+
+
 
 def load_theme_colors():
-    colors_file = os.path.join(SCRIPT_DIR, 'log_colors.json')
-    if not os.path.isfile(colors_file):
-        raise FileNotFoundError(f"Theme colors file not found: {colors_file}")
-    with open(colors_file, 'r') as f:
+    if not os.path.isfile(colors_json_path):
+        raise FileNotFoundError(f"Theme colors file not found: {colors_json_path}")
+    with open(colors_json_path, 'r') as f:
         return json.load(f)
 
 colors_config = load_theme_colors()
@@ -54,7 +61,7 @@ def rename_latest_log(log_dir):
             return
 
 def configure_logging():
-    log_dir = os.path.join(SCRIPT_DIR, 'logs')
+    log_dir = os.path.join(log_base_dir, 'logs')
     if not os.path.isdir(log_dir):
         os.makedirs(log_dir)
 
@@ -64,7 +71,12 @@ def configure_logging():
 
     rename_latest_log(log_dir)
 
-    log_file = os.path.join(log_dir, 'latest.log')
+    original_path = os.path.join(log_dir, 'latest.log')
+
+    global inter_log
+    inter_log = original_path
+
+    log_file = inter_log
 
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.INFO)
