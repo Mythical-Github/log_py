@@ -9,7 +9,7 @@ setup(
     ],
     include_package_data=True,
     package_data={
-        '': ['log_colors.json'],
+        '': ['log_colors.json.example'],
     },
     description='A Python module for advanced logging with color themes',
     long_description=open('README.md').read(),
