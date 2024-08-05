@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import logging
 from datetime import datetime
@@ -9,9 +10,15 @@ init(autoreset=True)
 
 logger = logging.getLogger(__name__)
 
+def get_resource_path(relative_path):
+    try:
+        base_path = getattr(sys, '_MEIPASS', os.getcwd())
+        return os.path.join(base_path, relative_path)
+    except Exception as e:
+        log_message(f"Error obtaining resource path: {e}")
+        return relative_path
 
 log_base_dir = f'{os.getcwd()}/src'
-
 colors_json_path = f'{log_base_dir}/log_colors.json'
 
 colors_config = ''
@@ -20,29 +27,24 @@ default_color = ''
 background_color = ''
 log_prefix = ''
 
-
-
 def module_setup():
     return
-
 
 def set_log_base_dir(base_dir: str):
     global log_base_dir
     log_base_dir = base_dir
-
+    global colors_json_path
+    colors_json_path = get_resource_path('log_colors.json')
 
 def set_colors_json_path(json_path: str):
     global colors_json_path
-    colors_json_path = json_path
-
-
+    colors_json_path = get_resource_path(json_path)
 
 def load_theme_colors():
     if not os.path.isfile(colors_json_path):
         raise FileNotFoundError(f"Theme colors file not found: {colors_json_path}")
     with open(colors_json_path, 'r') as f:
         return json.load(f)
-
 
 def log_message(message: str):
     logger.info(message)
@@ -68,7 +70,6 @@ def rename_latest_log(log_dir):
             return
 
 def configure_logging():
-
     global colors_config
     global theme_colors
     global default_color
