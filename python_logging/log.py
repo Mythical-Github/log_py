@@ -18,8 +18,8 @@ def get_resource_path(relative_path):
         log_message(f"Error obtaining resource path: {e}")
         return relative_path
 
-log_base_dir = f'{os.getcwd()}/src'
-colors_json_path = f'{log_base_dir}/log_colors.json'
+log_base_dir = get_resource_path('src')
+colors_json_path = get_resource_path('log_colors.json')
 
 colors_config = ''
 theme_colors = ''
@@ -32,7 +32,7 @@ def module_setup():
 
 def set_log_base_dir(base_dir: str):
     global log_base_dir
-    log_base_dir = base_dir
+    log_base_dir = get_resource_path(base_dir)
     global colors_json_path
     colors_json_path = get_resource_path('log_colors.json')
 
@@ -44,15 +44,22 @@ def load_theme_colors():
     if not os.path.isfile(colors_json_path):
         raise FileNotFoundError(f"Theme colors file not found: {colors_json_path}")
     with open(colors_json_path, 'r') as f:
-        return json.load(f)
+        try:
+            data = json.load(f)
+            if not isinstance(data, dict):
+                raise ValueError("Theme colors file should contain a JSON object.")
+            return data
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Error decoding JSON: {e}")
 
 def log_message(message: str):
     logger.info(message)
     color = default_color
-    for keyword, assigned_color in theme_colors.items():
-        if keyword in message:
-            color = assigned_color
-            break
+    if isinstance(theme_colors, dict):
+        for keyword, assigned_color in theme_colors.items():
+            if keyword in message:
+                color = assigned_color
+                break
     terminal_width = get_terminal_size().columns
     padded_message = (message[:terminal_width] if len(message) > terminal_width else message.ljust(terminal_width))
     print(f"{background_color}{color}{padded_message}{Style.RESET_ALL}")
@@ -76,32 +83,35 @@ def configure_logging():
     global background_color
     global log_prefix
 
-    colors_config = load_theme_colors()
-    theme_colors = colors_config.get('theme_colors', {})
-    default_color = colors_config['default_color']
-    background_color = colors_config['background_color']
-    log_prefix = colors_config['log_name_prefix']
+    try:
+        colors_config = load_theme_colors()
+        theme_colors = colors_config.get('theme_colors', {})
+        default_color = colors_config.get('default_color', Fore.WHITE)
+        background_color = colors_config.get('background_color', '')
+        log_prefix = colors_config.get('log_name_prefix', '')
 
-    log_dir = os.path.join(log_base_dir, 'logs')
-    if not os.path.isdir(log_dir):
-        os.makedirs(log_dir)
+        log_dir = os.path.join(log_base_dir, 'logs')
+        if not os.path.isdir(log_dir):
+            os.makedirs(log_dir)
 
-    for handler in logger.handlers[:]:
-        handler.close()
-        logger.removeHandler(handler)
+        for handler in logger.handlers[:]:
+            handler.close()
+            logger.removeHandler(handler)
 
-    rename_latest_log(log_dir)
+        rename_latest_log(log_dir)
 
-    original_path = os.path.join(log_dir, 'latest.log')
+        original_path = os.path.join(log_dir, 'latest.log')
 
-    global inter_log
-    inter_log = original_path
+        global inter_log
+        inter_log = original_path
 
-    log_file = inter_log
+        log_file = inter_log
 
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.INFO)
-    file_handler.setFormatter(logging.Formatter('%(message)s'))
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(logging.INFO)
+        file_handler.setFormatter(logging.Formatter('%(message)s'))
 
-    logger.addHandler(file_handler)
-    logger.setLevel(logging.INFO)
+        logger.addHandler(file_handler)
+        logger.setLevel(logging.INFO)
+    except Exception as e:
+        log_message(f"Error configuring logging: {e}")
