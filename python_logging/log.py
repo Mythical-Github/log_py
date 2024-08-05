@@ -34,8 +34,10 @@ def load_theme_colors():
 
 colors_config = load_theme_colors()
 theme_colors = colors_config.get('theme_colors', {})
-default_color = colors_config.get('default_color', Fore.LIGHTBLUE_EX)
-background_color = colors_config.get('background_color', '\033[48;2;40;42;54m')
+default_color = colors_config['default_color']
+background_color = colors_config['background_color']
+log_prefix = colors_config['log_name_prefix']
+
 
 def log_message(message: str):
     logger.info(message)
@@ -53,7 +55,7 @@ def rename_latest_log(log_dir):
     if os.path.isfile(latest_log_path):
         try:
             timestamp = datetime.now().strftime('%m_%d_%Y_%H%M_%S')
-            new_name = f'unreal_auto_mod_{timestamp}.log'
+            new_name = f'log_prefix{timestamp}.log'
             new_log_path = os.path.join(log_dir, new_name)
             os.rename(latest_log_path, new_log_path)
         except PermissionError as e:
