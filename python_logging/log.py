@@ -14,6 +14,17 @@ log_base_dir = f'{os.getcwd()}/src'
 
 colors_json_path = f'{log_base_dir}/log_colors.json'
 
+colors_config = ''
+theme_colors = ''
+default_color = ''
+background_color = ''
+log_prefix = ''
+
+
+
+def module_setup():
+    return
+
 
 def set_log_base_dir(base_dir: str):
     global log_base_dir
@@ -31,12 +42,6 @@ def load_theme_colors():
         raise FileNotFoundError(f"Theme colors file not found: {colors_json_path}")
     with open(colors_json_path, 'r') as f:
         return json.load(f)
-
-colors_config = load_theme_colors()
-theme_colors = colors_config.get('theme_colors', {})
-default_color = colors_config['default_color']
-background_color = colors_config['background_color']
-log_prefix = colors_config['log_name_prefix']
 
 
 def log_message(message: str):
@@ -63,6 +68,19 @@ def rename_latest_log(log_dir):
             return
 
 def configure_logging():
+
+    global colors_config
+    global theme_colors
+    global default_color
+    global background_color
+    global log_prefix
+
+    colors_config = load_theme_colors()
+    theme_colors = colors_config.get('theme_colors', {})
+    default_color = colors_config['default_color']
+    background_color = colors_config['background_color']
+    log_prefix = colors_config['log_name_prefix']
+
     log_dir = os.path.join(log_base_dir, 'logs')
     if not os.path.isdir(log_dir):
         os.makedirs(log_dir)
@@ -86,5 +104,3 @@ def configure_logging():
 
     logger.addHandler(file_handler)
     logger.setLevel(logging.INFO)
-
-configure_logging()
