@@ -11,7 +11,6 @@ init(autoreset=True)
 logger = logging.getLogger(__name__)
 
 def get_resource_path(relative_path):
-    """Get the absolute path to a resource in the package."""
     try:
         base_path = getattr(sys, '_MEIPASS', os.getcwd())
         return os.path.join(base_path, relative_path)
@@ -19,10 +18,9 @@ def get_resource_path(relative_path):
         log_message(f"Error obtaining resource path: {e}")
         return relative_path
 
-# Initialize global variables
-log_base_dir = os.getcwd()
+log_base_dir = get_resource_path('src')
 colors_json_path = get_resource_path('log_colors.json')
-cli_json_path = get_resource_path('cli.json')  # Initialize CLI JSON path
+
 colors_config = ''
 theme_colors = ''
 default_color = ''
@@ -30,57 +28,43 @@ background_color = ''
 log_prefix = ''
 
 def module_setup():
-    """Initial setup for modules."""
     return
 
 def set_log_base_dir(base_dir: str):
-    """Set the base directory for logs."""
     global log_base_dir
-    log_base_dir = base_dir
+    log_base_dir = get_resource_path(base_dir)
+    global colors_json_path
+    colors_json_path = get_resource_path('log_colors.json')
 
 def set_colors_json_path(json_path: str):
-    """Set the path for the colors JSON file."""
     global colors_json_path
-    colors_json_path = get_resource_path(json_path)  # Ensure path resolution
-
-def set_cli_json_path(json_path: str):
-    """Set the path for the CLI JSON file."""
-    global cli_json_path
-    cli_json_path = get_resource_path(json_path)  # Ensure path resolution
+    colors_json_path = get_resource_path(json_path)
 
 def load_theme_colors():
-    """Load the theme colors from the JSON file."""
-    try:
-        resolved_path = colors_json_path
-        log_message(f"Resolved path for colors JSON: {resolved_path}")
-        if not os.path.isfile(resolved_path):
-            raise FileNotFoundError(f"Theme colors file not found: {resolved_path}")
-        with open(resolved_path, 'r') as f:
+    if not os.path.isfile(colors_json_path):
+        raise FileNotFoundError(f"Theme colors file not found: {colors_json_path}")
+    with open(colors_json_path, 'r') as f:
+        try:
             data = json.load(f)
             if not isinstance(data, dict):
                 raise ValueError("Theme colors file should contain a JSON object.")
             return data
-    except Exception as e:
-        log_message(f"Error loading theme colors: {e}")
-        raise
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Error decoding JSON: {e}")
 
 def log_message(message: str):
-    """Log a message with color and style."""
-    try:
-        logger.info(message)
-        color = default_color
+    logger.info(message)
+    color = default_color
+    if isinstance(theme_colors, dict):
         for keyword, assigned_color in theme_colors.items():
             if keyword in message:
                 color = assigned_color
                 break
-        terminal_width = get_terminal_size().columns
-        padded_message = (message[:terminal_width] if len(message) > terminal_width else message.ljust(terminal_width))
-        print(f"{background_color}{color}{padded_message}{Style.RESET_ALL}")
-    except Exception as e:
-        print(f"Error in log_message: {e}")
+    terminal_width = get_terminal_size().columns
+    padded_message = (message[:terminal_width] if len(message) > terminal_width else message.ljust(terminal_width))
+    print(f"{background_color}{color}{padded_message}{Style.RESET_ALL}")
 
 def rename_latest_log(log_dir):
-    """Rename the latest log file with a timestamp."""
     latest_log_path = os.path.join(log_dir, 'latest.log')
     if os.path.isfile(latest_log_path):
         try:
@@ -93,7 +77,6 @@ def rename_latest_log(log_dir):
             return
 
 def configure_logging():
-    """Configure logging with file handler and color settings."""
     global colors_config
     global theme_colors
     global default_color
