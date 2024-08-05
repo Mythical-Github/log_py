@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 #     SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 # os.chdir(SCRIPT_DIR)
 
-SCRIPT_DIR = os.getcwd()
+SCRIPT_DIR = f'{os.getcwd()}/src'
 
 def load_theme_colors():
     colors_file = os.path.join(SCRIPT_DIR, 'log_colors.json')
