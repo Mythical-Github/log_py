@@ -22,6 +22,8 @@ background_color = ''
 log_prefix = ''
 
 
+has_configured_logging = False
+
 
 def module_setup():
     return
@@ -40,8 +42,6 @@ def set_colors_json_path(json_path: str):
     
     colors_json_path = os.path.join(base_path, json_filename)
 
-    print(f"Colors JSON path set to: {colors_json_path}")
-
 
 
 def load_theme_colors():
@@ -52,15 +52,21 @@ def load_theme_colors():
 
 
 def log_message(message: str):
-    logger.info(message)
-    color = default_color
-    for keyword, assigned_color in theme_colors.items():
-        if keyword in message:
-            color = assigned_color
-            break
-    terminal_width = get_terminal_size().columns
-    padded_message = (message[:terminal_width] if len(message) > terminal_width else message.ljust(terminal_width))
-    print(f"{background_color}{color}{padded_message}{Style.RESET_ALL}")
+    if has_configured_logging:
+        logger.info(message)
+        color = default_color
+        for keyword, assigned_color in theme_colors.items():
+            if keyword in message:
+                color = assigned_color
+                break
+        terminal_width = get_terminal_size().columns
+        padded_message = (message[:terminal_width] if len(message) > terminal_width else message.ljust(terminal_width))
+        print(f"{background_color}{color}{padded_message}{Style.RESET_ALL}")
+    else:
+        configure_logging()
+        global has_configured_logging
+        has_configured_logging = True
+
 
 def rename_latest_log(log_dir):
     latest_log_path = os.path.join(log_dir, 'latest.log')
