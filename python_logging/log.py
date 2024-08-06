@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import logging
 from datetime import datetime
@@ -33,7 +34,13 @@ def set_log_base_dir(base_dir: str):
 
 def set_colors_json_path(json_path: str):
     global colors_json_path
-    colors_json_path = json_path
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(__file__))
+    
+    json_filename = os.path.basename(json_path)
+    
+    colors_json_path = os.path.join(base_path, json_filename)
+
+    print(f"Colors JSON path set to: {colors_json_path}")
 
 
 
