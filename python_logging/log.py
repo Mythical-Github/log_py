@@ -90,6 +90,7 @@ def configure_logging():
 
 
 def log_message(message: str):
+    global has_configured_logging
     if has_configured_logging:
         logger.info(message)
         color = default_color
@@ -102,7 +103,6 @@ def log_message(message: str):
         print(f"{background_color}{color}{padded_message}{Style.RESET_ALL}")
     else:
         configure_logging()
-        global has_configured_logging
         has_configured_logging = True
 
 
