@@ -36,11 +36,12 @@ def set_log_base_dir(base_dir: str):
 
 def set_colors_json_path(json_path: str):
     global colors_json_path
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(__file__))
-    
-    json_filename = os.path.basename(json_path)
-    
-    colors_json_path = os.path.join(base_path, json_filename)
+    if getattr(sys, 'frozen', False):
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(__file__))
+        json_filename = os.path.basename(json_path)
+        colors_json_path = os.path.join(base_path, json_filename)
+    else:
+        colors_json_path = json_path
 
 
 def load_theme_colors():
