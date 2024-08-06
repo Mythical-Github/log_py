@@ -51,23 +51,6 @@ def load_theme_colors():
         return json.load(f)
 
 
-def log_message(message: str):
-    if has_configured_logging:
-        logger.info(message)
-        color = default_color
-        for keyword, assigned_color in theme_colors.items():
-            if keyword in message:
-                color = assigned_color
-                break
-        terminal_width = get_terminal_size().columns
-        padded_message = (message[:terminal_width] if len(message) > terminal_width else message.ljust(terminal_width))
-        print(f"{background_color}{color}{padded_message}{Style.RESET_ALL}")
-    else:
-        configure_logging()
-        global has_configured_logging
-        has_configured_logging = True
-
-
 def rename_latest_log(log_dir):
     latest_log_path = os.path.join(log_dir, 'latest.log')
     if os.path.isfile(latest_log_path):
@@ -117,3 +100,20 @@ def configure_logging():
 
     logger.addHandler(file_handler)
     logger.setLevel(logging.INFO)
+
+
+def log_message(message: str):
+    if has_configured_logging:
+        logger.info(message)
+        color = default_color
+        for keyword, assigned_color in theme_colors.items():
+            if keyword in message:
+                color = assigned_color
+                break
+        terminal_width = get_terminal_size().columns
+        padded_message = (message[:terminal_width] if len(message) > terminal_width else message.ljust(terminal_width))
+        print(f"{background_color}{color}{padded_message}{Style.RESET_ALL}")
+    else:
+        configure_logging()
+        global has_configured_logging
+        has_configured_logging = True
