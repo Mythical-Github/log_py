@@ -1,4 +1,4 @@
-# Python Logging
+# Log Py
 
 A Python module for advanced logging with color themes.
 
@@ -7,4 +7,4 @@ A Python module for advanced logging with color themes.
 You can install this package via pip:
 
 ```bash
-pip install git+https://github.com/Mythical-Github/python_logging.git
+pip install git+https://github.com/Mythical-Github/log_py.git
