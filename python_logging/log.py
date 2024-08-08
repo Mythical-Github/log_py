@@ -91,13 +91,31 @@ def log_message(message: str):
     padded_message = (message[:terminal_width] if len(message) > terminal_width else message.ljust(terminal_width))
     print(f"{background_color}{color}{padded_message}{Style.RESET_ALL}")
 
+import os
+import time
+
 def rename_latest_log(log_dir):
     latest_log_path = os.path.join(log_dir, 'latest.log')
     if os.path.isfile(latest_log_path):
         try:
+            # Define a temporary file name
+            temp_name = f'{log_prefix}temp_{datetime.now().strftime("%m_%d_%Y_%H%M_%S")}.log'
+            temp_log_path = os.path.join(log_dir, temp_name)
+
+            # Rename the latest log to a temporary name
+            os.rename(latest_log_path, temp_log_path)
+
+            # Pause briefly to ensure file operation completion
+            time.sleep(1)  # Adjust the sleep duration if needed
+
+            # Rename the temporary log to the final name
             timestamp = datetime.now().strftime('%m_%d_%Y_%H%M_%S')
-            new_name = f'{log_prefix}{timestamp}.log'
-            new_log_path = os.path.join(log_dir, new_name)
-            os.rename(latest_log_path, new_log_path)
+            final_name = f'{log_prefix}{timestamp}.log'
+            final_log_path = os.path.join(log_dir, final_name)
+            os.rename(temp_log_path, final_log_path)
+
         except PermissionError as e:
             log_message(f"Error renaming log file: {e}")
+        except Exception as e:
+            log_message(f"Unexpected error renaming log file: {e}")
+
