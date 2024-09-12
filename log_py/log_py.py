@@ -10,9 +10,7 @@ init(autoreset=True)
 
 logger = logging.getLogger(__name__)
 
-
 log_base_dir = f'{os.getcwd()}/src'
-
 colors_json_path = f'{log_base_dir}/log_colors.json'
 
 colors_config = ''
@@ -21,8 +19,14 @@ default_color = ''
 background_color = ''
 log_prefix = ''
 
-
 has_configured_logging = False
+
+
+class FlushFileHandler(logging.FileHandler):
+    """Custom FileHandler that flushes after every write."""
+    def emit(self, record):
+        super().emit(record)
+        self.flush()  # Ensures log is written immediately
 
 
 def module_setup():
@@ -52,7 +56,6 @@ def load_theme_colors():
 
 
 def configure_logging():
-
     global colors_config
     global theme_colors
     global default_color
@@ -82,7 +85,8 @@ def configure_logging():
 
     log_file = inter_log
 
-    file_handler = logging.FileHandler(log_file)
+    # Use FlushFileHandler to ensure immediate writes
+    file_handler = FlushFileHandler(log_file)
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(logging.Formatter('%(message)s'))
 
@@ -104,7 +108,6 @@ def log_message(message: str):
     terminal_width = get_terminal_size().columns
     padded_message = (message[:terminal_width] if len(message) > terminal_width else message.ljust(terminal_width))
     print(f"{background_color}{color}{padded_message}{Style.RESET_ALL}")
-
 
 
 def rename_latest_log(log_dir):
