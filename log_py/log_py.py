@@ -109,6 +109,10 @@ def log_message(message: str):
     padded_message = (message[:terminal_width] if len(message) > terminal_width else message.ljust(terminal_width))
     print(f"{background_color}{color}{padded_message}{Style.RESET_ALL}")
 
+    # Ensure file is flushed and available immediately
+    if hasattr(logger.handlers[0], 'flush'):
+        logger.handlers[0].flush()
+
 
 def rename_latest_log(log_dir):
     latest_log_path = os.path.join(log_dir, 'latest.log')
